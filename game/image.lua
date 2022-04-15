@@ -1,3 +1,5 @@
+-- Загрузка всех необходимых изображений
+
 image = {}
 image.btn_exit = lg.newImage("images/btn_exit.png")
 image.btn_play = lg.newImage("images/btn_play.png")
