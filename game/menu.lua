@@ -46,6 +46,7 @@ menu.pages["gamemode"].buttons.ai_vs_ai         = buttonCreate(conf.window_width
 menu.pages["gamemode"].update = function()
     if menu.pages["gamemode"].buttons.player_vs_ai.is_mouse_up then 
         game.gamemode = "player_vs_ai" -- Установить режим игры "Игрок против ИИ"
+        menu.page_now = "ai_step" -- Перейти на страницу "ai_step"
     end
 
     if menu.pages["gamemode"].buttons.player_vs_player.is_mouse_up then 
@@ -55,6 +56,7 @@ menu.pages["gamemode"].update = function()
 
     if menu.pages["gamemode"].buttons.ai_vs_ai.is_mouse_up then
         game.gamemode = "ai_vs_ai" -- Установить режим игры "ИИ против ИИ"
+        menu.page_now = "first_step"
     end
 end
 
@@ -107,6 +109,25 @@ menu.pages["field_size"].update = function()
 end
 
 --[[ 
+    "ai_step" - страница, на которой игрок решает, будет ли он ходить первым, или первым будет ходить искусственный интеллект
+ ]]
+menu.pages["ai_step"] = {}
+menu.pages["ai_step"].buttons = {}
+menu.pages["ai_step"].buttons.player = buttonCreate(conf.window_width/2-125, 100, 250, image.btn_player)
+menu.pages["ai_step"].buttons.ai  = buttonCreate(conf.window_width/2-125, 200, 250, image.btn_ai)
+menu.pages["ai_step"].update = function()
+    if menu.pages["ai_step"].buttons.player.is_mouse_up then
+        menu.page_now = "first_step"
+        game.is_ai_frist_step = false -- Первым играет игрок
+    end
+
+    if menu.pages["ai_step"].buttons.ai.is_mouse_up then
+        menu.page_now = "first_step"
+        game.is_ai_frist_step = true -- Первым играет ИИ
+    end
+end
+
+--[[ 
     На странице "game" ничего нет. За логику и отрисовку игры отвечают файлы game.lua и field.lua
  ]]
 menu.pages["game"] = {}
@@ -153,7 +174,7 @@ function menu:draw()
     lg.setColor(0, 0.9, 0)
     if menu.page_now == "gamemode" then
         lg.print("Выберите режим игры", 130, 50, 0, 1.25)
-    elseif menu.page_now == "first_step" then
+    elseif menu.page_now == "first_step" or menu.page_now == "ai_step"  then
         lg.print("Кто ходит первым?", 145, 50, 0, 1.25)
     elseif menu.page_now == "field_size" then
         lg.print("Выберите размер игровго поля", 85, 50, 0, 1.25)

@@ -13,4 +13,6 @@ image.btn_3 = lg.newImage("images/btn_3.png")
 image.btn_4= lg.newImage("images/btn_4.png")
 image.btn_5 = lg.newImage("images/btn_5.png")
 image.btn_again = lg.newImage("images/btn_again.png")
+image.btn_player = lg.newImage("images/btn_player.png")
+image.btn_ai = lg.newImage("images/btn_ai.png")
 

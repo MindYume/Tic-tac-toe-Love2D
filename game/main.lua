@@ -14,11 +14,13 @@ le = love.event
 require("config")
 require("image")
 require("button")
+require("ai")
 require("game")
 require("menu")
 require("field")
 draw = require("draw")
 
+math.randomseed(os.clock())
 
 -- love.load() выполняется один раз при запуске программы
 function love.load()

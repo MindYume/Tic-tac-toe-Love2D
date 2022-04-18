@@ -60,11 +60,39 @@ function field:setSize(size)
     field:load()
 end
 
+-- Создаёт копию любой карты
+function field:make_map_copy_general(map_in)
+    local map = {}
+
+    for i = 1, field.size do
+        map[i] = {}
+        for j = 1, field.size do
+            map[i][j] = map_in[i][j]
+        end
+    end
+
+    return map
+end
+
+-- Создаёт копию карты игровго поля
+function field:make_map_copy()
+    return field:make_map_copy_general(field.map)
+end
+
+-- Поставить крестик или нолик в ячейче в указанных координатах
+function field:setBlock(x, y, block_type)
+    if block_type == "cross" then
+        field.map[x][y] = 1
+    elseif block_type == "zero" then
+        field.map[x][y] = 2
+    end
+end
+
 -- Поставить крестик или нолик в ячейче, которая была нажата последней
 function field:setLastBlock(block_type)
     if block_type == "cross" then
         field.map[field.block_last_x][field.block_last_y] = 1
-    elseif "zero" then
+    elseif block_type == "zero" then
         field.map[field.block_last_x][field.block_last_y] = 2
     end
 end
@@ -98,13 +126,13 @@ end
     1 - линия заполнена крестиками
     2 - линия заполнена ноликами
  ]]
-function field:checkLine(y)
-    if field.map[1][y] ~= 0 then
-        local frist_block = field.map[1][y]
+function field:checkLine(y, map)
+    if map[1][y] ~= 0 then
+        local frist_block = map[1][y]
         local is_line_full = true
 
         for i = 2, field.size do
-            if field.map[i][y] ~= frist_block then
+            if map[i][y] ~= frist_block then
                 is_line_full = false
                 break
             end
@@ -126,13 +154,13 @@ end
     1 - столбец заполнен крестиками
     2 - столбец заполнен ноликами
  ]]
-function field:checkColumn(x)
-    if field.map[x][1] ~= 0 then
-        local frist_block = field.map[x][1]
+function field:checkColumn(x, map)
+    if map[x][1] ~= 0 then
+        local frist_block = map[x][1]
         local is_line_full = true
 
         for i = 2, field.size do
-            if field.map[x][i] ~= frist_block then
+            if map[x][i] ~= frist_block then
                 is_line_full = false
                 break
             end
@@ -154,13 +182,13 @@ end
     1 - диагональ заполнена крестиками
     2 - диагональ заполнена ноликами
  ]]
-function field:checkDiagonal1()
-    if field.map[1][1] ~= 0 then
-        local frist_block = field.map[1][1]
+function field:checkDiagonal1(map)
+    if map[1][1] ~= 0 then
+        local frist_block = map[1][1]
         local is_line_full = true
 
         for i = 2, field.size do
-            if field.map[i][i] ~= frist_block then
+            if map[i][i] ~= frist_block then
                 is_line_full = false
                 break
             end
@@ -182,13 +210,13 @@ end
     1 - диагональ заполнена крестиками
     2 - диагональ заполнена ноликами
  ]]
-function field:checkDiagonal2()
-    if field.map[field.size][1] ~= 0 then
-        local frist_block = field.map[field.size][1]
+function field:checkDiagonal2(map)
+    if map[field.size][1] ~= 0 then
+        local frist_block = map[field.size][1]
         local is_line_full = true
 
         for i = 2, field.size do
-            if field.map[field.size-i+1][i] ~= frist_block then
+            if map[field.size-i+1][i] ~= frist_block then
                 is_line_full = false
                 break
             end
@@ -210,34 +238,79 @@ end
     "zero"  - выиграли нолики
     "No winner" - нет победителя
 ]]
-function field:checkWin()
+function field:checkWin(map)
     local win_player = 0
     local is_some_player_win = false
 
     for i = 1, field.size do
-        line_check = field:checkLine(i)
+        line_check = field:checkLine(i, map)
         if is_some_player_win == false and line_check ~= 0 then
             win_player = line_check
             is_some_player_win = true
         end
 
-        column_check = field:checkColumn(i)
+        column_check = field:checkColumn(i, map)
         if is_some_player_win == false and column_check ~= 0 then
             win_player = column_check
             is_some_player_win = true
         end
     end
 
-    diagonal1_check = field:checkDiagonal1()
+    diagonal1_check = field:checkDiagonal1(map)
     if is_some_player_win == false and diagonal1_check ~= 0 then
         win_player = diagonal1_check
         is_some_player_win = true
     end
 
-    diagonal2_check = field:checkDiagonal2()
+    diagonal2_check = field:checkDiagonal2(map)
     if is_some_player_win == false and diagonal2_check ~= 0 then
         win_player = diagonal2_check
         is_some_player_win = true
+    end
+
+    if is_some_player_win then
+        if win_player == 1 then
+            return "cross"
+        elseif win_player == 2 then
+            return "zero"
+        end
+    else
+        return "No winner"
+    end
+end
+
+--[[ 
+    Оптимизированная версия функции checkWin.
+    Нужна для более быстрой работы ИИ.
+ ]]
+function field:checkWinOptimized(map, x, y)
+    local win_player = 0
+    local is_some_player_win = false
+
+    line_check = field:checkLine(x, map)
+    if is_some_player_win == false and line_check ~= 0 then
+        win_player = line_check
+        is_some_player_win = true
+    end
+
+    column_check = field:checkColumn(y, map)
+    if is_some_player_win == false and column_check ~= 0 then
+        win_player = column_check
+        is_some_player_win = true
+    end
+
+    if x == y then
+        diagonal1_check = field:checkDiagonal1(map)
+        if is_some_player_win == false and diagonal1_check ~= 0 then
+            win_player = diagonal1_check
+            is_some_player_win = true
+        end
+
+        diagonal2_check = field:checkDiagonal2(map)
+        if is_some_player_win == false and diagonal2_check ~= 0 then
+            win_player = diagonal2_check
+            is_some_player_win = true
+        end
     end
 
     if is_some_player_win then

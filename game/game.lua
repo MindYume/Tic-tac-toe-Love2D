@@ -16,6 +16,9 @@ game.gamemode = "player_vs_player"
         "zero"      - первыми ходят нолики
  ]]
 game.first_step = "cross" 
+game.is_ai_frist_step = false
+
+game.is_aiStep = false -- ходит ли в данный момент ИИ
 game.is_started = false   -- запущена ли игра
 game.is_game_over = false -- Закончилась ли игра
 game.step = "cross"       -- Игрок, который ходит в данный момент 
@@ -39,12 +42,76 @@ function game:start()
     game.is_game_over = false
     game.winner = "No winner"
     game.is_started = true
+    game.is_aiStep = game.is_ai_frist_step
     game.step = game.first_step
+
+    if game.is_aiStep then
+        ai:startStep()
+    end
 end
 
 -- Закончить игру
 function game:stop()
     game.is_started = false
+end
+
+-- Сделать ход за игрока
+function game:player_step()
+    if field.is_some_block_clicked and field:isLastBlockEmpty() then -- Если нажата какая-то кнопка на игровом поле, и ячейка на месте этой кнопки пустая
+        field:setLastBlock(game.step) -- Поставить на месте этой ячейки крестик или нолик. Зависит от того, кто ходит
+
+        -- Передать ход другому игроку
+        if game.step == "cross" then
+            game.step = "zero"
+        elseif game.step == "zero" then
+            game.step = "cross"
+        end
+
+        if game.gamemode == "player_vs_ai" then
+            game.is_aiStep = true
+            ai:startStep()
+        end
+
+
+        game.winner = field:checkWin(field.map) -- Есть ли победитель
+        if game.winner ~= "No winner" or field:is_field_full() then -- Если есть победитель или если поле уже заполнено
+            game.is_game_over = true
+            field:clearButtonsHovers() -- Убрать подсветку при наведении мыши с кнопок на игровом поле
+        end
+    end
+end
+
+-- Сделать ход за ИИ
+function game:aiStep()
+
+    if ai.is_ready_to_go then -- Если ИИ готов сделать ход
+
+        ai:stepSmart()
+
+        -- Передать ход другому игроку
+        if game.step == "cross" then
+            game.step = "zero"
+        elseif game.step == "zero" then
+            game.step = "cross"
+        end
+
+        if game.gamemode == "player_vs_ai" then
+            game.is_aiStep = false
+        end
+
+        if game.gamemode == "ai_vs_ai" then
+            ai:startStep()
+        end
+
+        game.winner = field:checkWin(field.map) -- Есть ли победитель
+        if game.winner ~= "No winner" or field:is_field_full() then -- Если есть победитель или если поле уже заполнено
+            game.is_game_over = true
+            field:clearButtonsHovers() -- Убрать подсветку при наведении мыши с кнопок на игровом поле
+        end
+        
+    else
+        ai:wait() -- Ждать пока ИИ не будет готов сделать ход
+    end
 end
 
 -- game:update() выполняется постоянно в файле main.lua
@@ -60,21 +127,20 @@ function game:update()
         else -- Если игра идёт
             field:update() -- Обновить состояние поля и его кнопок
 
-            if field.is_some_block_clicked and field:isLastBlockEmpty() then -- Если нажата какая-то кнопка на игровом поле, и ячейка на месте этой кнопки пустая
-                field:setLastBlock(game.step) -- Поставить на месте этой ячейки крестик или нолик. Зависит от того, кто ходит
+            if game.gamemode == "player_vs_player" then
 
-                -- Передать ход другому игроку
-                if game.step == "cross" then
-                    game.step = "zero"
-                elseif game.step == "zero" then
-                    game.step = "cross"
+                game:player_step()
+
+            elseif game.gamemode == "player_vs_ai" then
+
+                if game.is_aiStep then
+                    game:aiStep()
+                else
+                    game:player_step()
                 end
 
-                game.winner = field:checkWin() -- Есть ли победитель
-                if game.winner ~= "No winner" or field:is_field_full() then -- Если есть победитель или если поле уже заполнено
-                    game.is_game_over = true
-                    field:clearButtonsHovers() -- Убрать подсветку при наведении мыши с кнопок на игровом поле
-                end
+            elseif game.gamemode == "ai_vs_ai" then
+                game:aiStep()
             end
         end
         
