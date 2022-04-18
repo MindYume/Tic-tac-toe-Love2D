@@ -6,6 +6,13 @@ draw = require("draw")
 field = {}
 field.size = 3 -- размер игрового поля
 
+-- Линия, которая отрисовывается, когда кто-то из игроков победил
+field.win_line = {}
+field.win_line.x1 = 1
+field.win_line.y1 = 1
+field.win_line.x2 = 3
+field.win_line.y2 = 3
+
 -- координаты последней ячейки, которая была нажата
 field.block_last_x = 1 
 field.block_last_y = 1
@@ -134,11 +141,17 @@ function field:checkLine(y, map)
         for i = 2, field.size do
             if map[i][y] ~= frist_block then
                 is_line_full = false
+
                 break
             end
         end
 
         if is_line_full then
+            field.win_line.x1 = 1
+            field.win_line.y1 = y
+            field.win_line.x2 = field.size
+            field.win_line.y2 = y
+
             return frist_block 
         else
             return 0
@@ -167,6 +180,11 @@ function field:checkColumn(x, map)
         end
 
         if is_line_full then
+            field.win_line.x1 = x
+            field.win_line.y1 = 1
+            field.win_line.x2 = x
+            field.win_line.y2 = field.size
+
             return frist_block 
         else
             return 0
@@ -195,6 +213,11 @@ function field:checkDiagonal1(map)
         end
 
         if is_line_full then
+            field.win_line.x1 = 1
+            field.win_line.y1 = 1
+            field.win_line.x2 = field.size
+            field.win_line.y2 = field.size
+
             return frist_block 
         else
             return 0
@@ -223,6 +246,11 @@ function field:checkDiagonal2(map)
         end
 
         if is_line_full then
+            field.win_line.x1 = field.size
+            field.win_line.y1 = 1
+            field.win_line.x2 = 1
+            field.win_line.y2 = field.size
+
             return frist_block 
         else
             return 0
@@ -333,7 +361,18 @@ function field:clearButtonsHovers()
     end
 end
 
-
+-- Отрисовывает линию, когда кто-то из игроков победил
+function field:drawWinLine()
+    lg.setColor(0, 0.9, 0)
+    lg.setLineStyle("smooth")
+    lg.setLineWidth(5)
+    lg.line(
+        field.first_block_x+ (field.win_line.x1-1)*field.block_width,
+        field.first_block_y+ (field.win_line.y1-1)*field.block_width,
+        field.first_block_x+ (field.win_line.x2-1)*field.block_width,
+        field.first_block_y+ (field.win_line.y2-1)*field.block_width
+    )
+end
 
 function field:update()
     field.is_some_block_clicked = false

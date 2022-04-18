@@ -48,6 +48,8 @@ function buttonCreate(x, y, width, img)
             if lm.isDown(1) then
                 obj.is_mouse_down = true
             elseif obj.is_mouse_down then
+                la.play(sound.btn_click) -- Проиграть звук при нажатии кнопки
+
                 obj.is_mouse_up = true
                 obj.is_mouse_down = false
             end

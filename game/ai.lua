@@ -80,6 +80,9 @@ end
 
 --[[ 
     ИИ проверяет, наколько выгоден данный ход
+    score = 1  - ход выгоден
+    score = -1 - ход не выгоден
+    score = 0  - ход нейтральный
  ]]
 function ai:checkWinStep(map_in, player_win, player_now)
     local map_check = field:make_map_copy_general(map_in)
@@ -112,7 +115,7 @@ end
 
 
 --[[ 
-    Рекурсивная функция, которая прощитывает несколько шагов наперёд и оценивает качество хода
+    Рекурсивная функция, которая проверяет несколько шагов наперёд и оценивает качество хода
  ]]
 function ai:getScore(map_in, x, y, player_win, player_now, score_steps)
     local score = 0
@@ -200,6 +203,7 @@ function ai:stepSmart()
     
 
 end
+
 
 function ai:startStep()
     ai.time = os.clock()

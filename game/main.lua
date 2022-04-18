@@ -1,7 +1,7 @@
 --  Main.lua - основной файл, который исполняется первым
 
 --[[
-    lg, lw, lm, le - это сокращения для модулей из фреймворка Love2D.
+    lg, lw, lm, le, la - это сокращения для модулей из фреймворка Love2D.
     Модули нужны для выполнения методов из Love2D, которые позволяют,
     например, отрисовывать графику, обрабатывать нажатия мыши, проигрывать звуки и т.д. 
     Докумментация по Love2D https://love2d.org/wiki/Main_Page
@@ -10,9 +10,11 @@ lg = love.graphics
 lw = love.window
 lm = love.mouse
 le = love.event
+la = love.audio
 
 require("config")
 require("image")
+require("sound")
 require("button")
 require("ai")
 require("game")

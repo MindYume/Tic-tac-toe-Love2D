@@ -56,7 +56,7 @@ function game:stop()
 end
 
 -- Сделать ход за игрока
-function game:player_step()
+function game:playerStep()
     if field.is_some_block_clicked and field:isLastBlockEmpty() then -- Если нажата какая-то кнопка на игровом поле, и ячейка на месте этой кнопки пустая
         field:setLastBlock(game.step) -- Поставить на месте этой ячейки крестик или нолик. Зависит от того, кто ходит
 
@@ -129,18 +129,20 @@ function game:update()
 
             if game.gamemode == "player_vs_player" then
 
-                game:player_step()
+                game:playerStep()
 
             elseif game.gamemode == "player_vs_ai" then
 
                 if game.is_aiStep then
                     game:aiStep()
                 else
-                    game:player_step()
+                    game:playerStep()
                 end
 
             elseif game.gamemode == "ai_vs_ai" then
+
                 game:aiStep()
+
             end
         end
         
@@ -177,6 +179,10 @@ function game:draw()
             end
         end
 
+    end
+
+    if game.is_game_over and game.winner ~= "No winner" then
+        field:drawWinLine()
     end
 
 end
